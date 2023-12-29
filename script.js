@@ -1,6 +1,9 @@
 const get_meal_btn = document.getElementById('get_meal');
 const meal_container = document.getElementById('meal');
 
+const searchMealBtn = document.getElementById('searchMeal');
+const searchInput = document.getElementById('searchInput');
+
 get_meal_btn.addEventListener('click', () => {
 	fetch('https://www.themealdb.com/api/json/v1/1/random.php')
 		.then(res => res.json())
@@ -22,11 +25,11 @@ const createMeal = (meal) => {
 	const newInnerHTML = `
 		<div class="row">
 			<div class="columns five">
-				<img src="${meal.strMealThumb}" alt="Meal Image"> 
-                <div class="columns seven">
-				    <h2>${meal.strMeal}</h2>
-				    <p>${meal.strInstructions}</p>
-			    </div>
+				<div class="columns seven">
+					<h2>${meal.strMeal}</h2>
+					<p>${meal.strInstructions}</p>
+				</div>
+				<img src="${meal.strMealThumb}" alt="Meal Image">
 				${meal.strCategory ? `<p><strong>Category:</strong> ${meal.strCategory}</p>` : ''}
 				${meal.strArea ? `<p><strong>Area:</strong> ${meal.strArea}</p>` : ''}
 				${meal.strTags ? `<p><strong>Tags:</strong> ${meal.strTags.split(',').join(', ')}</p>` : ''}
@@ -49,3 +52,25 @@ const createMeal = (meal) => {
 	
 	meal_container.innerHTML = newInnerHTML;
 }
+
+// Function to fetch meals based on search term
+const searchMeal = () => {
+    const searchTerm = searchInput.value;
+
+    if (searchTerm.trim() !== '') {
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res.meals) {
+                    // Display the first meal from the search results
+                    createMeal(res.meals[0]);
+                } else {
+                    mealContainer.innerHTML = '<p>No matching meals found.</p>';
+                }
+            });
+    } else {
+        mealContainer.innerHTML = '<p>Please enter a search term.</p>';
+    }
+};
+
+searchMealBtn.addEventListener('click', searchMeal);

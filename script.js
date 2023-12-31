@@ -4,6 +4,8 @@ const meal_container = document.getElementById('meal');
 const searchMealBtn = document.getElementById('searchMeal');
 const searchInput = document.getElementById('searchInput');
 
+const resultsContainer = document.getElementById('resultsContainer');
+
 get_meal_btn.addEventListener('click', () => {
 	fetch('https://www.themealdb.com/api/json/v1/1/random.php')
 		.then(res => res.json())
@@ -12,7 +14,52 @@ get_meal_btn.addEventListener('click', () => {
 	});
 });
 
+searchMealBtn.addEventListener('click', () => {
+	const searchTerm = searchInput.value.trim().toLowerCase();
+
+    if (searchTerm !== '') {
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`)
+            .then(res => res.json())
+            .then(res => {
+                displaySearchResults(res.meals);
+            });
+    }
+})
+
+const displaySearchResults = (meals) => {
+    resultsContainer.innerHTML = ''; // Clear previous results
+	meal_container.innerHTML = '';
+
+    if (meals && meals.length > 0) {
+        meals.forEach((meal, index) => {
+            const mealItem = document.createElement('div');
+            mealItem.classList.add('meal-item');
+
+            mealItem.innerHTML = `
+				<div class = "meal-content">
+                	<img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="meal-img";>
+                	<h2 class="meal-title">${meal.strMeal}</h2>
+                	<button class="view-recipe-btn" onclick="viewRecipe('${meal.idMeal}')">View Recipe</button>
+				</div>
+            `;
+
+			if ((index + 1) % 3 === 0) {
+                mealItem.classList.add('third-item');
+            }
+
+            resultsContainer.appendChild(mealItem);
+        });
+    } else {
+        resultsContainer.innerHTML = '<p>No matching recipes found.</p>';
+    }
+};
+
+const viewRecipe = (mealId) => {
+	searchMeal();
+};
+
 const createMeal = (meal) => {
+	resultsContainer.innerHTML = '';
 	const ingredients = [];
 	for(let i=1; i<=20; i++) {
 		if(meal[`strIngredient${i}`]) {
@@ -72,5 +119,3 @@ const searchMeal = () => {
         mealContainer.innerHTML = '<p>Please enter a search term.</p>';
     }
 };
-
-searchMealBtn.addEventListener('click', searchMeal);
